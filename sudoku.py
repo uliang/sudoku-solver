@@ -42,12 +42,14 @@ def is_valid_entry(entry_code, data):
         return True
 
 
-def draw_entries(data, ax):
-    for entry_code in data:
+def draw_entries(init_data, sol_data, ax):
+    for entry_code in init_data:
         ax.text(*read_cell_code(entry_code), color="k", fontsize=14)
+    for entry_code in sol_data:
+        ax.text(*read_cell_code(entry_code), color="b", fontsize=14)
 
 
-def make_board(data):
+def make_board(init_data, sol_data):
     sudoku = plt.figure()
     ax = sudoku.add_subplot(111)
     ax.set_xlim(0, 9)
@@ -63,7 +65,7 @@ def make_board(data):
     ax.tick_params(which="both", bottom="off", left="off")
     ax.grid(lw=3, color="k")
     ax.grid(which="minor", lw=1, color="k")
-    draw_entries(data, ax)
+    draw_entries(init_data, sol_data, ax)
     return sudoku
 
 
@@ -76,14 +78,25 @@ def read_cell_code(code):
 def main():
     print('\n'*100)
     print("Sudoku solver program\n=======================")
-    data = np.array([118, 135, 156, 164, 192,
-                     216, 222, 253, 311, 337, 358,
-                     375, 426, 443, 461, 495, 538,
-                     546, 565, 571, 615, 647, 668,
-                     683, 731, 755, 773, 794, 851,
-                     887, 896, 914, 942, 957, 979,
-                     991])
+#    data = np.array([118, 135, 156, 164, 192,
+#                     216, 222, 253, 311, 337, 358,
+#                     375, 426, 443, 461, 495, 538,
+#                     546, 565, 571, 615, 647, 668,
+#                     683, 731, 755, 773, 794, 851,
+#                     887, 896, 914, 942, 957, 979,
+#                     991])
 
+    data = np.array([126, 138, 142, 153, 199,
+                     213, 232, 249, 254, 271,
+                     335, 361,
+                     412, 496,
+                     516, 525, 537, 544, 568, 572, 581, 593,
+                     618, 694,
+                     741, 774,
+                     834, 852, 863, 876, 898,
+                     917, 956, 964, 979, 982])
+    init_data = data
+    sol_data = []
     choices = {}
     loop_count = 0
     while loop_count < 200:
@@ -91,23 +104,17 @@ def main():
         print(loop_count)
         choices = {cell: get_allowed_cell_values(cell, data)
                    for cell in get_empty_cells(data)}
+        # print(choices)
         if choices != {}:
             # Find a cell with only one valid entry
             for key, val in choices.items():
                 if len(val) == 1:
-                    # print(data)
                     data = np.concatenate((data, val))
-                    # print(data)
-
-            #make_board(data)
-            #searchable = False
+                    sol_data += val
         else:
-            make_board(data)
+            make_board(init_data, sol_data)
             print("Solved!")
             break
-
-#    print(choices)
-#    make_board(data)
 
 
 if __name__ == "__main__":
