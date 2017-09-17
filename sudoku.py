@@ -1,5 +1,45 @@
+#!/usr/bin/env python 3
+# -*- coding: utf-8 -*-
 import matplotlib.pyplot as plt
 import matplotlib as mpl
+import numpy as np
+import functools
+
+
+def get_empty_cells(data):
+    filled_cells = data//10
+    whole_board = np.setdiff1d(np.array(range(11, 100)),
+                               np.array(range(20, 100, 10)))
+    return np.setdiff1d(whole_board, filled_cells)
+
+
+def select_same_(entry_code, data):
+    same_box = np.intersect1d(
+                    data[(data - 100)//300 == (entry_code - 100)//300],
+                    data[(data % 100 - 10)//30 == (entry_code % 100 - 10)//30])
+    same_col = data[data % 100 // 10 == entry_code % 100 // 10]
+    same_row = data[data//100 == entry_code//100]
+    return same_row, same_col, same_box
+
+
+def get_allowed_cell_values(cell_code, data):
+    nums = np.array(range(1, 10))
+    allowed_vals = [np.setdiff1d(nums, axis % 10)
+                    for axis in select_same_(cell_code*10, data)]
+    allowed_vals = functools.reduce(np.intersect1d, allowed_vals)
+    return [cell_code*10 + vals for vals in allowed_vals]
+
+
+def is_valid_entry(entry_code, data):
+    same_row, same_col, same_box = select_same_(entry_code, data)
+    if any([(entry_code - row_code) % 10 == 0 for row_code in same_row]):
+        return False
+    elif any([(entry_code - col_code) % 10 == 0 for col_code in same_col]):
+        return False
+    elif any([(entry_code - box_code) % 10 == 0 for box_code in same_box]):
+        return False
+    else:
+        return True
 
 
 def draw_entries(data, ax):
@@ -30,16 +70,24 @@ def make_board(data):
 def read_cell_code(code):
     row, r1 = divmod(code, 100)
     col, num_entry = divmod(r1, 10)
-    return col + 0.4 - 1, row + 0.3 - 1, str(num_entry)
+    return col - 0.6, 9.3 - row, str(num_entry)
 
 
 def main():
     print('\n'*100)
     print("Sudoku solver program\n=======================")
-    print('\n'*2)
-    make_board(data=[111])
-#    code = int(input("Input three digit code\n>>>"))
-#    print(read_cell_code(code))
+    data = np.array([118, 135, 156, 164, 192,
+                     216, 222, 253, 311, 337, 358,
+                     375, 426, 443, 461, 495, 538,
+                     546, 565, 571, 615, 647, 668,
+                     683, 731, 755, 773, 794, 851,
+                     887, 896, 914, 942, 957, 979,
+                     991])
+    choices = {cell: get_allowed_cell_values(cell, data)
+               for cell in get_empty_cells(data)}
+    print(choices)
+    make_board(data)
+
 
 
 if __name__ == "__main__":
