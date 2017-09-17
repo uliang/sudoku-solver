@@ -83,11 +83,31 @@ def main():
                      683, 731, 755, 773, 794, 851,
                      887, 896, 914, 942, 957, 979,
                      991])
-    choices = {cell: get_allowed_cell_values(cell, data)
-               for cell in get_empty_cells(data)}
-    print(choices)
-    make_board(data)
 
+    choices = {}
+    loop_count = 0
+    while loop_count < 200:
+        loop_count += 1
+        print(loop_count)
+        choices = {cell: get_allowed_cell_values(cell, data)
+                   for cell in get_empty_cells(data)}
+        if choices != {}:
+            # Find a cell with only one valid entry
+            for key, val in choices.items():
+                if len(val) == 1:
+                    # print(data)
+                    data = np.concatenate((data, val))
+                    # print(data)
+
+            #make_board(data)
+            #searchable = False
+        else:
+            make_board(data)
+            print("Solved!")
+            break
+
+#    print(choices)
+#    make_board(data)
 
 
 if __name__ == "__main__":
