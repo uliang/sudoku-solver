@@ -84,7 +84,7 @@ def is_valid_state(data, bad_codes, sol_data):
 
 
 def main():
-    print('\n'*100)
+#    print('\n'*100)
     print("Sudoku solver program\n=======================")
 #    data = np.array([118, 135, 156, 164, 192,
 #                     216, 222, 253, 311, 337, 358,
@@ -94,21 +94,42 @@ def main():
 #                     683, 731, 755, 773, 794, 851,
 #                     991])
 
-    data = np.array([126, 138, 142, 153, 199,
-                     213, 232, 249, 254, 271,
-                     335, 361,
-                     412, 496,
-                     516, 525, 537, 544, 568, 572, 581, 593,
-                     618, 694,
-                     741, 774,
-                     834, 852, 863, 876, 898,
-                     917, 956, 964, 979, 982])
+#    data = np.array([126, 138, 142, 153, 199,
+#                     213, 232, 249, 254, 271,
+#                     335, 361,
+#                     412, 496,
+#                     516, 525, 537, 544, 568, 572, 581, 593,
+#                     618, 694,
+#                     741, 774,
+#                     834, 852, 863, 876, 898,
+#                     917, 956, 964, 979, 982])
+    # evil
+#    data = np.array([128, 133, 161, 199,
+#                     221, 256, 264,
+#                     315, 334,
+#                     412, 436, 447,
+#                     554,
+#                     663, 677, 698,
+#                     778, 793,
+#                     841, 855, 889,
+#                     917, 944, 976, 981])
+
+    data = np.array([168, 182, 193,
+                     235, 242,
+                     331, 347, 359,
+                     449, 476, 499,
+                     514, 595,
+                     611, 633, 667,
+                     756, 769, 777,
+                     821, 862, 878,
+                     912, 928, 944])
     init_data = data
     sol_data = np.array([], dtype=int)
     bad_codes = []
     loop_count = 0
     try_next = False
-    while loop_count < 100:
+    branch_head = []
+    while loop_count < 1000:
         loop_count += 1
         print(loop_count)
         choices_list = [get_allowed_cell_values(code, data)
@@ -123,29 +144,47 @@ def main():
                     make_board(init_data, sol_data)
                     raise ValueError("Unsolvable state encountered")
                 else:
+                    print("Available choices ", choices)
                     for c in choices:
+                        if len(choices) > 1:
+                            branch_head.append(c)
+                            print("Branch head at: %d" % c)
                         print("Trying %d " % c)
                         if is_valid_state(np.r_[data, c], bad_codes, sol_data):
-                            data = np.r_[data, c]
-                            sol_data = np.r_[sol_data, c]
+                            data, sol_data = np.r_[data, c], np.r_[sol_data, c]
                             try_next = False
                             break
                         else:
                             print("%d is an invalid code" % c)
-                            bad_codes.append(c)
+                            #bad_codes.append(c)
                             try_next = True
                 if not try_next:
                     break
                 else:
-                    continue
-
-
-
-        # board is solved
+                    try:
+                        latest = branch_head.pop(-1)
+                    except:
+                        print("Bad codes", bad_codes)
+                        print("Solution", sol_data)
+                        make_board(init_data, sol_data)
+                        raise ValueError("Unsolvable state")
+                    print("Current branch heads", branch_head)
+                    print("Deleting %d" % latest)
+                    bad_codes = [latest]
+                    data = np.delete(
+                        data, np.s_[np.where(data == latest)[0][0]: ]
+                        )
+                    sol_data = np.delete(
+                        sol_data, np.s_[
+                            np.where(sol_data == latest)[0][0]: ]
+                        )
+                    break
+      # board is solved
         else:
-            make_board(init_data, sol_data)
+#            make_board(init_data, sol_data)
             print("Solved!")
             break
+    make_board(init_data, sol_data)
 
 
 if __name__ == "__main__":
