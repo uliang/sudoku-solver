@@ -78,8 +78,8 @@ def read_cell_code(code):
 def is_valid_state(data, bad_codes, sol_data):
     choices_list = [get_allowed_cell_values(code, data)
                     for code in get_empty_cells(data)]
-    choices_list = [np.setdiff1d(x, bad_codes) for x in choices_list]
-    choices_list = [np.setdiff1d(x, sol_data) for x in choices_list]
+#    choices_list = [np.setdiff1d(x, bad_codes) for x in choices_list]
+#    choices_list = [np.setdiff1d(x, sol_data) for x in choices_list]
     return all([len(x)!=0 for x in choices_list])
 
 
@@ -114,28 +114,38 @@ def main():
 #                     841, 855, 889,
 #                     917, 944, 976, 981])
 
-    data = np.array([168, 182, 193,
-                     235, 242,
-                     331, 347, 359,
-                     449, 476, 499,
-                     514, 595,
-                     611, 633, 667,
-                     756, 769, 777,
-                     821, 862, 878,
-                     912, 928, 944])
+#    data = np.array([168, 182, 193,
+#                     235, 242,
+#                     331, 347, 359,
+#                     449, 476, 499,
+#                     514, 595,
+#                     611, 633, 667,
+#                     756, 769, 777,
+#                     821, 862, 878,
+#                     912, 928, 944])
+
+    data = np.array([118, 125, 157, 174,
+                     227, 242,
+                     326, 369,
+                     419, 456,
+                     513, 538, 577, 591,
+                     652, 695,
+                     748, 782,
+                     861, 889,
+                     937, 953, 985, 998])
     init_data = data
     sol_data = np.array([], dtype=int)
     bad_codes = []
     loop_count = 0
     try_next = False
     branch_head = []
-    while loop_count < 1000:
+    while loop_count < 600:
         loop_count += 1
         print(loop_count)
         choices_list = [get_allowed_cell_values(code, data)
                         for code in get_empty_cells(data)]
         choices_list = [np.setdiff1d(x, bad_codes) for x in choices_list]
-        choices_list = [np.setdiff1d(x, sol_data) for x in choices_list]
+#        choices_list = [np.setdiff1d(x, sol_data) for x in choices_list]
         choices_list = sorted(choices_list, key=lambda x: len(x))
         # check if the board is solved
         if len(choices_list) != 0:
