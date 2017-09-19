@@ -75,6 +75,14 @@ def read_cell_code(code):
     return col - 0.6, 9.3 - row, str(num_entry)
 
 
+def is_valid_state(data, bad_codes, sol_data):
+    choices_list = [get_allowed_cell_values(code, data)
+                    for code in get_empty_cells(data)]
+    choices_list = [np.setdiff1d(x, bad_codes) for x in choices_list]
+    choices_list = [np.setdiff1d(x, sol_data) for x in choices_list]
+    return all([len(x)!=0 for x in choices_list])
+
+
 def main():
     print('\n'*100)
     print("Sudoku solver program\n=======================")
@@ -82,8 +90,8 @@ def main():
 #                     216, 222, 253, 311, 337, 358,
 #                     375, 426, 443, 461, 495, 538,
 #                     546, 565, 571, 615, 647, 668,
-#                     683, 731, 755, 773, 794, 851,
 #                     887, 896, 914, 942, 957, 979,
+#                     683, 731, 755, 773, 794, 851,
 #                     991])
 
     data = np.array([126, 138, 142, 153, 199,
@@ -96,21 +104,44 @@ def main():
                      834, 852, 863, 876, 898,
                      917, 956, 964, 979, 982])
     init_data = data
-    sol_data = []
-    choices = {}
+    sol_data = np.array([], dtype=int)
+    bad_codes = []
     loop_count = 0
-    while loop_count < 200:
+    try_next = False
+    while loop_count < 100:
         loop_count += 1
         print(loop_count)
-        choices = {cell: get_allowed_cell_values(cell, data)
-                   for cell in get_empty_cells(data)}
-        # print(choices)
-        if choices != {}:
-            # Find a cell with only one valid entry
-            for key, val in choices.items():
-                if len(val) == 1:
-                    data = np.concatenate((data, val))
-                    sol_data += val
+        choices_list = [get_allowed_cell_values(code, data)
+                        for code in get_empty_cells(data)]
+        choices_list = [np.setdiff1d(x, bad_codes) for x in choices_list]
+        choices_list = [np.setdiff1d(x, sol_data) for x in choices_list]
+        choices_list = sorted(choices_list, key=lambda x: len(x))
+        # check if the board is solved
+        if len(choices_list) != 0:
+            for choices in choices_list:
+                if len(choices) == 0:
+                    make_board(init_data, sol_data)
+                    raise ValueError("Unsolvable state encountered")
+                else:
+                    for c in choices:
+                        print("Trying %d " % c)
+                        if is_valid_state(np.r_[data, c], bad_codes, sol_data):
+                            data = np.r_[data, c]
+                            sol_data = np.r_[sol_data, c]
+                            try_next = False
+                            break
+                        else:
+                            print("%d is an invalid code" % c)
+                            bad_codes.append(c)
+                            try_next = True
+                if not try_next:
+                    break
+                else:
+                    continue
+
+
+
+        # board is solved
         else:
             make_board(init_data, sol_data)
             print("Solved!")
