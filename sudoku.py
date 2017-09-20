@@ -11,14 +11,16 @@ from puzzles import puzzle3
 def get_empty_cells(data):
     filled_cells = data//10
     whole_board = np.setdiff1d(np.array(range(11, 100)),
-                               np.array(range(20, 100, 10)))
-    return np.setdiff1d(whole_board, filled_cells)
+                               np.array(range(20, 100, 10)),
+                               assume_unique=True)
+    return np.setdiff1d(whole_board, filled_cells, assume_unique=True)
 
 
 def select_same_(entry_code, data):
     same_box = np.intersect1d(
-                    data[(data - 100)//300 == (entry_code - 100)//300],
-                    data[(data % 100 - 10)//30 == (entry_code % 100 - 10)//30])
+        data[(data - 100)//300 == (entry_code - 100)//300],
+        data[(data % 100 - 10)//30 == (entry_code % 100 - 10)//30],
+        assume_unique=True)
     same_col = data[data % 100 // 10 == entry_code % 100 // 10]
     same_row = data[data//100 == entry_code//100]
     return same_row, same_col, same_box
@@ -26,7 +28,7 @@ def select_same_(entry_code, data):
 
 def get_allowed_cell_values(cell_code, data):
     nums = np.array(range(1, 10))
-    allowed_vals = [np.setdiff1d(nums, axis % 10)
+    allowed_vals = [np.setdiff1d(nums, axis % 10, assume_unique=True)
                     for axis in select_same_(cell_code*10, data)]
     allowed_vals = functools.reduce(np.intersect1d, allowed_vals)
     return [cell_code*10 + vals for vals in allowed_vals]
@@ -83,7 +85,6 @@ def main():
     t0 = time()
     while loop_count < 1000:
         loop_count += 1
-#        print(loop_count)
         choices_list = [
             np.setdiff1d(
                 get_allowed_cell_values(code, data),
@@ -104,22 +105,23 @@ def main():
                     reach_end_of_choices = False
                     break
                 else:
-                     reach_end_of_choices = True
+                    reach_end_of_choices = True
             if reach_end_of_choices:
                 latest = branch_head.pop(-1)
                 bad_codes = [latest]
                 data = np.delete(
-                    data, np.s_[np.where(data == latest)[0][0]: ]
+                    data, np.s_[np.where(data == latest)[0][0]:]
                     )
                 sol_data = np.delete(
                     sol_data, np.s_[
-                        np.where(sol_data == latest)[0][0]: ]
+                        np.where(sol_data == latest)[0][0]:]
                     )
-      # board is solved
+        # board is solved
         else:
             print("Solved! in %.4f" % (time()-t0))
             break
     make_board(init_data, sol_data)
+
 
 if __name__ == "__main__":
     main()
