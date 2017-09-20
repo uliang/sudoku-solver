@@ -67,7 +67,7 @@ def read_cell_code(code):
     return col - 0.6, 9.3 - row, str(num_entry)
 
 
-def is_valid_state(data, bad_codes, sol_data):
+def is_valid_state(data):
     return all([
         len(get_allowed_cell_values(code, data)) != 0
         for code in get_empty_cells(data)
@@ -100,7 +100,7 @@ def main():
             for c in choices:
                 if len(choices) > 1:
                     branch_head.append(c)
-                if is_valid_state(np.r_[data, c], bad_codes, sol_data):
+                if is_valid_state(np.r_[data, c]):
                     data, sol_data = np.r_[data, c], np.r_[sol_data, c]
                     reach_end_of_choices = False
                     break
