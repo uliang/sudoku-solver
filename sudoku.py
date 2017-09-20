@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import numpy as np
 import functools
+from time import time
 
 
 def get_empty_cells(data):
@@ -85,7 +86,7 @@ def is_valid_state(data, bad_codes, sol_data):
 
 def main():
 #    print('\n'*100)
-    print("Sudoku solver program\n=======================")
+#    print("Sudoku solver program\n=======================")
 #    data = np.array([118, 135, 156, 164, 192,
 #                     216, 222, 253, 311, 337, 358,
 #                     375, 426, 443, 461, 495, 538,
@@ -114,6 +115,7 @@ def main():
 #                     841, 855, 889,
 #                     917, 944, 976, 981])
 
+# XXX might have something wrong with this puzzle. Input error?
 #    data = np.array([168, 182, 193,
 #                     235, 242,
 #                     331, 347, 359,
@@ -124,24 +126,42 @@ def main():
 #                     821, 862, 878,
 #                     912, 928, 944])
 
-    data = np.array([118, 125, 157, 174,
-                     227, 242,
-                     326, 369,
-                     419, 456,
-                     513, 538, 577, 591,
-                     652, 695,
-                     748, 782,
-                     861, 889,
-                     937, 953, 985, 998])
+#    data = np.array([118, 125, 157, 174,
+#                     227, 242,
+#                     326, 369,
+#                     419, 456,
+#                     513, 538, 577, 591,
+#                     652, 695,
+#                     748, 782,
+#                     861, 889,
+#                     937, 953, 985, 998])
+#    data = np.array([118, 121, 193,
+#                     241, 264,
+#                     322, 335, 343, 397,
+#                     433, 444, 458, 487,
+#                     631, 667, 672, 698,
+#                     712, 725, 779,
+#                     849, 894,
+#                     938, 986])
+
+    data = np.array([139, 141, 198,
+                     227, 259, 274, 293,
+                     316, 362,
+                     435, 452, 489, 494,
+                     612, 629, 657, 676,
+                     742, 795,
+                     818, 831, 855, 883,
+                     917, 969, 971])
     init_data = data
     sol_data = np.array([], dtype=int)
     bad_codes = []
     loop_count = 0
     try_next = False
     branch_head = []
+    t0 = time()
     while loop_count < 600:
         loop_count += 1
-        print(loop_count)
+#        print(loop_count)
         choices_list = [get_allowed_cell_values(code, data)
                         for code in get_empty_cells(data)]
         choices_list = [np.setdiff1d(x, bad_codes) for x in choices_list]
@@ -154,18 +174,18 @@ def main():
                     make_board(init_data, sol_data)
                     raise ValueError("Unsolvable state encountered")
                 else:
-                    print("Available choices ", choices)
+#                    print("Available choices ", choices)
                     for c in choices:
                         if len(choices) > 1:
                             branch_head.append(c)
-                            print("Branch head at: %d" % c)
-                        print("Trying %d " % c)
+#                            print("Branch head at: %d" % c)
+#                        print("Trying %d " % c)
                         if is_valid_state(np.r_[data, c], bad_codes, sol_data):
                             data, sol_data = np.r_[data, c], np.r_[sol_data, c]
                             try_next = False
                             break
                         else:
-                            print("%d is an invalid code" % c)
+#                            print("%d is an invalid code" % c)
                             #bad_codes.append(c)
                             try_next = True
                 if not try_next:
@@ -178,8 +198,8 @@ def main():
                         print("Solution", sol_data)
                         make_board(init_data, sol_data)
                         raise ValueError("Unsolvable state")
-                    print("Current branch heads", branch_head)
-                    print("Deleting %d" % latest)
+#                    print("Current branch heads", branch_head)
+#                    print("Deleting %d" % latest)
                     bad_codes = [latest]
                     data = np.delete(
                         data, np.s_[np.where(data == latest)[0][0]: ]
@@ -192,10 +212,13 @@ def main():
       # board is solved
         else:
 #            make_board(init_data, sol_data)
-            print("Solved!")
+            print("Solved! in %.4f" % (time()-t0))
             break
+#    if all([is_valid_entry(codes, data) for codes in sol_data]):
+#        print("Solution validated!")
+#    else:
+#        print("Solution invalid")
     make_board(init_data, sol_data)
-
 
 if __name__ == "__main__":
     main()
