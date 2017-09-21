@@ -67,17 +67,9 @@ def read_cell_code(code):
     return col - 0.6, 9.3 - row, str(num_entry)
 
 
-def is_valid_state(data):
-    return all([
-        len(get_allowed_cell_values(code, data)) != 0
-        for code in get_empty_cells(data)
-        ])
-
-
 def main():
-    init_data = puzzles.puzzle4
+    init_data = puzzles.puzzle3
     data = init_data
-    sol_data = np.array([], dtype=int)
     bad_codes = []
     branch_head = []
     loop_count = 0
@@ -85,14 +77,25 @@ def main():
     t0 = time()
     while loop_count < 1000:
         loop_count += 1
-        choices_list = [
-            np.setdiff1d(
-                get_allowed_cell_values(code, data),
-                bad_codes,
-                assume_unique=True
-                )
-            for code in get_empty_cells(data)
-        ]
+        if loop_count == 1:
+            choices_list = [
+                np.setdiff1d(
+                    get_allowed_cell_values(code, data),
+                    bad_codes,
+                    assume_unique=True
+                    )
+                for code in get_empty_cells(data)
+            ]
+        else:
+            data = test_data
+            choices_list = [
+                np.setdiff1d(
+                    test_choices,
+                    bad_codes,
+                    assume_unique=True
+                    )
+                for test_choices in test_choices_list
+            ]
         choices_list = sorted(choices_list, key=len)
         # check if the board is solved
         if len(choices_list) != 0:
@@ -100,26 +103,27 @@ def main():
             for c in choices:
                 if len(choices) > 1:
                     branch_head.append(c)
-                if is_valid_state(np.r_[data, c]):
-                    data, sol_data = np.r_[data, c], np.r_[sol_data, c]
+                test_data = np.r_[data, c]
+                test_choices_list = [
+                    get_allowed_cell_values(code, test_data)
+                    for code in get_empty_cells(test_data)
+                ]
+                if all([len(test_choices) != 0
+                        for test_choices in test_choices_list]):
                     reach_end_of_choices = False
                     break
                 else:
                     reach_end_of_choices = True
             if reach_end_of_choices:
-                latest = branch_head.pop(-1)
-                bad_codes = [latest]
-                data = np.delete(
-                    data, np.s_[np.where(data == latest)[0][0]:]
-                    )
-                sol_data = np.delete(
-                    sol_data, np.s_[
-                        np.where(sol_data == latest)[0][0]:]
+                bad_codes = [branch_head.pop(-1)]
+                test_data = np.delete(
+                    data, np.s_[np.where(data == bad_codes[0])[0][0]:]
                     )
         # board is solved
         else:
             print("Solved! in %.4f" % (time()-t0))
             break
+    sol_data = np.setdiff1d(data, init_data, assume_unique=True)
     make_board(init_data, sol_data)
 
 
