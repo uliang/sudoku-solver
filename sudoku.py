@@ -5,7 +5,7 @@ import matplotlib as mpl
 import numpy as np
 import functools
 from time import time
-from puzzles import puzzle3
+import puzzles
 
 
 def get_empty_cells(data):
@@ -75,7 +75,7 @@ def is_valid_state(data):
 
 
 def main():
-    init_data = puzzle3
+    init_data = puzzles.puzzle4
     data = init_data
     sol_data = np.array([], dtype=int)
     bad_codes = []
