@@ -119,6 +119,10 @@ def main():
                 test_data = np.delete(
                     data, np.s_[np.where(data == bad_codes[0])[0][0]:]
                     )
+                test_choices_list = [
+                    get_allowed_cell_values(code, test_data)
+                    for code in get_empty_cells(test_data)
+                ]
         # board is solved
         else:
             print("Solved! in %.4f" % (time()-t0))
